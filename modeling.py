@@ -7,6 +7,7 @@ Created on Thu Jul 29 00:50:37 2021
 
 from crawler import *
 from utils import * 
+import pandas as pd
 
 base_path = "C:/Users/pschw/Dropbox/Columbia/Courses/NLP for Python/Project/code/NLP_final_project/"
 
@@ -35,20 +36,20 @@ pca_tfidf_stem = my_pca(my_tfidf_stem, base_path + "output/")
 # this is not for predictions themselves but to optimize the parameters
 #x is the independent variable, y the dependent variable
 x_train_param, x_pred, y_train_param, y_pred = split_data(
-    my_tfidf_text, country_set.hdi_cat, 0.8)
+    my_vec_stem, country_set.hdi_cat, 0.8)
 
 #specify parameters
 ## random forrest
 # parameters = {'n_estimators':[10, 100], 'max_depth':[None, 10, 100],
 #               "random_state": [456]}
 ## support vector machine
-# parameters = {'C':[0.01, 1.0], 'kernel':['linear', 'poly'],
-#               "random_state": [123], 'probability': [True]}
+parameters = {'C':[0.01, 1.0], 'kernel':['linear', 'poly'],
+              "random_state": [123], 'probability': [True]}
 ## naive bayes
-parameters = {'alpha':[0.001, 1.0], "fit_prior": [True, False]}
+# parameters = {'alpha':[0.001, 1.0], "fit_prior": [True, False]}
 
 #chose model to use
-flag = "nb"
+flag = "svm"
 
 #model training and specifications
 optimal_params = grid_search_fun(x_train_param, y_train_param, parameters, flag)
@@ -62,3 +63,8 @@ rf_model = my_rf(
 
 #apply the random forrest on the test set
 model_metrics = perf_metrics(rf_model, x_test, y_test)
+
+model_metrics = pd.DataFrame(model_metrics)
+model_metrics.index = ["precision","recall", "f-score","support"]
+model_metrics.to_csv(base_path + "output/svm_vs.csv")
+print(model_metrics)
